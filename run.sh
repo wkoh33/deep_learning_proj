@@ -31,6 +31,7 @@ done
 # # Train FixMatch
 # # Example: FixMatch with 32 filters on cifar10 shuffled with seed=3, 40 labeled samples and 1
 # CUDA_VISIBLE_DEVICES=0 python fixmatch.py --filters=32 --dataset=cifar10.3@40-1 --train_dir ./experiments/fixmatch
+CUDA_VISIBLE_DEVICES=0 python fixmatch.py --filters=3 --dataset=cifar10.3@10-1 --train_dir ./experiments/fixmatch
 
 # # Validate
 # # Following the previous example in which we trained cifar10.3@250-5000, extracting accuracy:
