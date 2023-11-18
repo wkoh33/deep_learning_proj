@@ -1,8 +1,14 @@
 #!/bin/bash
 #SBATCH -JSlurmPythonExample                    # Job name
-#SBATCH -N1 --ntasks-per-node=4                 # Number of nodes and cores per node required
-#SBATCH --mem-per-cpu=1G                        # Memory per core
-#SBATCH -t15                                    # Duration of the job (Ex: 15 mins)
+
+#SBATCH --gres=gpu:1
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=16G
+
+#SBATCH -t5                                    # Duration of the job (Ex: 15 mins)
+
 #SBATCH -oReport-%j.out                         # Combined output and error messages file
 #SBATCH --mail-type=FAIL              # Mail preferences
 #SBATCH --mail-user=wkoh33@gatech.edu        # E-mail address for notifications
@@ -18,5 +24,5 @@ export CUDA_VISIBLE_DEVICES=0
 echo $ML_DATA
 echo $PYTHONPATH
 
-srun python test.py                             # Example Process
-# srun python fixmatch.py --filters=3 --dataset=cifar10.3@10-1 --train_dir ./experiments/fixmatch
+srun python fixmatch.py --filters=3 --dataset=cifar10.3@10-1 --train_dir ./experiments/fixmatch
+# srun python test.py                             # Example Process
