@@ -1,13 +1,13 @@
 #!/bin/bash
 #SBATCH -JSlurmTrainModel                    # Job name
 
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:4
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=16G
 
-#SBATCH  --time=00:05:00                                    # Duration of the job (Ex: 15 mins)
+#SBATCH  --time=16:00:00                                    # Duration of the job (Ex: 15 mins)
 
 #SBATCH -oReport-%j.out                         # Combined output and error messages file
 #SBATCH --mail-type=END,FAIL              # Mail preferences
@@ -24,11 +24,11 @@ export PYTHONPATH=/home/hice1/$GATECH_EMAIL/deep_learning_proj
 #     --filters=32 \
 #     --batch=512 \
 #     --dataset=cifar10.3@10-1 \
-#     --arch=resnet
+#     --arch=resnet \
 #     --train_dir ./experiments/fixmatch
 
 srun python fixmatch.py \
     --batch=512 \
     --dataset=cifar10.3@10-1 \
-    --arch=squeezenet
+    --arch=squeezenet \
     --train_dir ./experiments/fixmatch
