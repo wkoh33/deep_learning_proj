@@ -56,6 +56,8 @@ class CNN13(ClassifySemi):
             y = tf.layers.batch_normalization(y, **bn_args)
             y = tf.reduce_mean(y, [1, 2])  # (b, 6, 6, 128) -> (b, 128)
             logits = tf.layers.dense(y, self.nclass)
+
+            print(logits.shape, y.shape)
         return EasyDict(logits=logits, embeds=y)
 
 
@@ -95,6 +97,8 @@ class ResNet(ClassifySemi):
             if dropout and training:
                 y = tf.nn.dropout(y, 1 - dropout)
             logits = tf.layers.dense(y, self.nclass, kernel_initializer=tf.glorot_normal_initializer())
+        
+        print(logits.shape, embeds.shape)
         return EasyDict(logits=logits, embeds=embeds)
 
 
@@ -145,9 +149,50 @@ class ShakeNet(ClassifySemi):
         return EasyDict(logits=logits, embeds=embeds)
 
 
-class MultiModel(CNN13, ResNet, ShakeNet):
-    MODELS = ('cnn13', 'resnet', 'shake')
-    MODEL_CNN13, MODEL_RESNET, MODEL_SHAKE = MODELS
+class SqueezeNet(ClassifySemi):
+    def fire_module(self, x, s1, e1, e3):
+        x = tf.layers.conv2d(x, filters=s1, kernel_size=1, activation='relu', padding='same')
+        
+        left = tf.layers.conv2d(x, filters=e1, kernel_size=1, activation='relu', padding='same')
+        right = tf.layers.conv2d(x, filters=e3, kernel_size=3, activation='relu', padding='same')
+        
+        x = tf.concat([left, right], axis=-1)
+        return x
+
+    def classifier(self, x, scales, filters, repeat, training, getter=None, dropout=0, **kwargs):
+        del kwargs
+        # bn_args = dict(training=training, momentum=0.999)
+
+        with tf.variable_scope('classify', reuse=tf.AUTO_REUSE, custom_getter=getter):
+            # x = tf.layers.conv2d((x - self.dataset.mean) / self.dataset.std, filters=96, kernel_size=7, strides=2, activation='relu')
+            x = tf.layers.conv2d(x, filters=96, kernel_size=7, strides=2, activation='relu')
+            x = tf.layers.max_pooling2d(x, pool_size=3, strides=2, padding='same')
+
+            x = self.fire_module(x, 16, 64, 64)
+            x = self.fire_module(x, 16, 64, 64)
+            x = self.fire_module(x, 32, 128, 128)
+            x = tf.layers.max_pooling2d(x, pool_size=3, strides=2, padding='same')
+
+            x = self.fire_module(x, 32, 128, 128)
+            x = self.fire_module(x, 48, 192, 192)
+            x = self.fire_module(x, 48, 192, 192)
+            x = self.fire_module(x, 64, 256, 256)
+            x = tf.layers.max_pooling2d(x, pool_size=3, strides=2, padding='same')
+
+            x = self.fire_module(x, 64, 256, 256)
+            if training:
+                x = tf.layers.dropout(x, 0.5)
+
+            x = tf.layers.conv2d(x, self.nclass, kernel_size = 1)
+            x = tf.nn.relu(x)
+            logits = tf.reduce_mean(x, axis=[1, 2])
+
+            return EasyDict(logits=logits, embeds=x)
+
+
+class MultiModel(CNN13, ResNet, ShakeNet, SqueezeNet):
+    MODELS = ('cnn13', 'resnet', 'shake', 'squeezenet')
+    MODEL_CNN13, MODEL_RESNET, MODEL_SHAKE, MODEL_SQUEEZENET = MODELS
 
     def augment(self, x, l, smoothing, **kwargs):
         del kwargs
@@ -160,6 +205,8 @@ class MultiModel(CNN13, ResNet, ShakeNet):
             return ResNet.classifier(self, x, **kwargs)
         elif arch == self.MODEL_SHAKE:
             return ShakeNet.classifier(self, x, **kwargs)
+        elif arch == self.MODEL_SQUEEZENET:
+            return SqueezeNet.classifier(self, x, **kwargs)
         raise ValueError('Model %s does not exists, available ones are %s' % (arch, self.MODELS))
 
 
