@@ -2,7 +2,7 @@
 #SBATCH -JSlurmPrepData                    # Job name
 
 #SBATCH -N1 --ntasks-per-node=8                 # Number of nodes and cores per node required
-#SBATCH --mem-per-cpu=1G                        # Memory per core
+#SBATCH --mem-per-cpu=20G                        # Memory per core
 #SBATCH  --time=03:00:00                        # Duration of the job (Ex: 15 mins)
 
 #SBATCH -oReport-%j.out                         # Combined output and error messages file
