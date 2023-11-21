@@ -1,13 +1,13 @@
 #!/bin/bash
 #SBATCH -JSlurmTrainModel                    # Job name
 
-#SBATCH --gres=gpu:4
+#SBATCH --gres=gpu:2
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=16G
 
-#SBATCH  --time=16:00:00                                    # Duration of the job (Ex: 15 mins)
+#SBATCH  --time=08:00:00                                    # Duration of the job (Ex: 15 mins)
 
 #SBATCH -oReport-%j.out                         # Combined output and error messages file
 #SBATCH --mail-type=END,FAIL              # Mail preferences
