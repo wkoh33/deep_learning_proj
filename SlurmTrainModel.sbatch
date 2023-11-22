@@ -11,7 +11,7 @@
 
 #SBATCH -oReport-%j.out                         # Combined output and error messages file
 #SBATCH --mail-type=END,FAIL              # Mail preferences
-#SBATCH --mail-user=wkoh33@gatech.edu        # E-mail address for notifications
+#SBATCH --mail-user=fho30@gatech.edu        # E-mail address for notifications
 
 module load anaconda3/2022.05.0.1                           # Load module dependencies
 conda activate proj
