@@ -1,0 +1,41 @@
+1. Setup PACE
+- https://edstem.org/us/courses/41219/discussion/3577999
+- https://gatech.service-now.com/home?id=kb_article_view&sysparm_article=KB0042102
+
+2. GlobalProtect VPN
+- https://gatech.service-now.com/home?id=kb_article_view&sysparm_article=KB0042139
+
+3. Login SSH
+- https://gatech.service-now.com/home?id=kb_article_view&sysparm_article=KB0042100
+
+4. Setup anaconda env
+- Find `init.sh` in project folder and run those comments line by line
+
+5. Prepare Data on your environment
+- Go to SlurmPrepData.sbatch
+- Change line 10 and 15 to your gatech email
+- `cd deep_learning_proj`
+- `sbatch SlurmPrepData.sbatch`
+    - This should trigger a batch job on the PACE cluster
+    - https://ondemand-ice.pace.gatech.edu/pun/sys/dashboard/activejobs
+
+6. PACE dashboard
+- https://ondemand-ice.pace.gatech.edu/pun/sys/dashboard/files/fs/home/hice1
+- Go to your own personal folder
+- Files Tab to see your files in the server
+- Data from step 5 should be in `scratch/data` folder
+
+7. Train model
+- Model is found in `libml/models.py`
+- I've coded out the SqueezeNet but not sure if its correct
+    - Never reached a completed training yet
+- Go to `SlurmTrainModel.sbatch`
+- Change line 14 and 19 to your gatech email
+- Read the proper `README` to know what is happening
+- `arch=squeezenet` or `arch=resnet` for the choice of model
+- Feel free to tweak GPU at line 4 and time at line 10
+- additional params found in `fixmatch.py`
+- Model training will create checkpoint where subsequent training of same configs will continue from where the model training timeout
+
+8. Model Eval
+- Not reached this stage before
