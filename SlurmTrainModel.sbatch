@@ -27,7 +27,7 @@ export PYTHONPATH=/home/hice1/$GATECH_EMAIL/deep_learning_proj
 #     --arch=resnet \
 #     --train_dir ./experiments/fixmatch
 
-srun python fixmatch.py \
+srun CUDA_VISIBLE_DEVICES=0,1,2,3 python fixmatch.py \
     --batch=512 \
     --dataset=cifar10.3@10-1 \
     --arch=squeezenet \
