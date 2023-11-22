@@ -12,7 +12,7 @@
 module load anaconda3/2022.05.0.1                           # Load module dependencies
 conda activate proj
 
-GATECH_EMAIL=wkoh33
+GATECH_EMAIL=fho30
 export ML_DATA=/home/hice1/$GATECH_EMAIL/scratch/data
 export PYTHONPATH=/home/hice1/$GATECH_EMAIL/deep_learning_proj
 
