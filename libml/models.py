@@ -164,28 +164,31 @@ class SqueezeNet(ClassifySemi):
         # bn_args = dict(training=training, momentum=0.999)
 
         with tf.variable_scope('classify', reuse=tf.AUTO_REUSE, custom_getter=getter):
-            # x = tf.layers.conv2d((x - self.dataset.mean) / self.dataset.std, filters=96, kernel_size=7, strides=2, activation='relu')
-            x = tf.layers.conv2d(x, filters=96, kernel_size=7, strides=2, activation='relu')
+            x = (x - self.dataset.mean) / self.dataset.std
+            # x = tf.layers.conv2d(x, filters=96, kernel_size=7, strides=2, activation='relu')
+            x = tf.layers.conv2d(x, filters=64, kernel_size=3, strides=2, activation='relu')
             x = tf.layers.max_pooling2d(x, pool_size=3, strides=2, padding='same')
 
             x = self.fire_module(x, 16, 64, 64)
             x = self.fire_module(x, 16, 64, 64)
+            x = tf.layers.max_pooling2d(x, pool_size=3, strides=2, padding='same')
+            
+            x = self.fire_module(x, 32, 128, 128)
             x = self.fire_module(x, 32, 128, 128)
             x = tf.layers.max_pooling2d(x, pool_size=3, strides=2, padding='same')
-
-            x = self.fire_module(x, 32, 128, 128)
+            
             x = self.fire_module(x, 48, 192, 192)
             x = self.fire_module(x, 48, 192, 192)
             x = self.fire_module(x, 64, 256, 256)
-            x = tf.layers.max_pooling2d(x, pool_size=3, strides=2, padding='same')
-
             x = self.fire_module(x, 64, 256, 256)
+            
             if training:
                 x = tf.layers.dropout(x, 0.5)
 
             x = tf.layers.conv2d(x, self.nclass, kernel_size = 1)
             x = tf.nn.relu(x)
-            logits = tf.reduce_mean(x, axis=[1, 2])
+
+            logits = tf.keras.layers.GlobalAveragePooling2D()(x)
 
             return EasyDict(logits=logits, embeds=x)
 
