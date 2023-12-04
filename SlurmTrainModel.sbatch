@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -JSlurmTrainModel                    # Job name
 
-#SBATCH --gres=gpu:1 -C A100-80GB
+#SBATCH --gres=gpu:1
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --mem=100G
@@ -20,15 +20,11 @@ GATECH_EMAIL=wkoh33
 export ML_DATA=/home/hice1/$GATECH_EMAIL/scratch/data
 export PYTHONPATH=/home/hice1/$GATECH_EMAIL/deep_learning_proj
 
-# srun python fixmatch.py \
-#     --filters=32 \
-#     --batch=512 \
-#     --dataset=cifar10.3@10-1 \
-#     --arch=resnet \
-#     --train_dir ./experiments/fixmatch
-
 srun python fixmatch.py \
-    --batch=512 \
-    --dataset=cifar10.3@10-1 \
-    --arch=squeezenet \
+    --lr=0.02 \
+    --confidence=0.90 \
+    --dataset=cifar10.3@250-1 \
+    --arch=squeezenetmini \
     --train_dir ./experiments/fixmatch
+
+# TEST
