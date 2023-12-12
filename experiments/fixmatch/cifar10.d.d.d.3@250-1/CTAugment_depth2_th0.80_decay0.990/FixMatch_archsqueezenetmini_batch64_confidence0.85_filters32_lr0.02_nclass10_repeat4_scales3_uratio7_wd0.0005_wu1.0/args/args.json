@@ -1,0 +1,13 @@
+{
+    "arch": "squeezenetmini",
+    "batch": 64,
+    "confidence": 0.85,
+    "filters": 32,
+    "lr": 0.02,
+    "nclass": 10,
+    "repeat": 4,
+    "scales": 3,
+    "uratio": 7,
+    "wd": 0.0005,
+    "wu": 1.0
+}

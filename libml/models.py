@@ -275,9 +275,48 @@ class SqueezeNetMini(ClassifySemi):
             return EasyDict(logits=logits, embeds=x)
 
 
-class MultiModel(CNN13, ResNet, ShakeNet, SqueezeNet, SqueezeNetCifar, SqueezeNetMini):
-    MODELS = ('cnn13', 'resnet', 'shake', 'squeezenet' , 'squeezenetcifar', 'squeezenetmini')
-    MODEL_CNN13, MODEL_RESNET, MODEL_SHAKE, MODEL_SQUEEZENET, MODEL_SQUEEZENETCIFAR, MODEL_SQUEEZENETMINI  = MODELS
+class SqueezeNetMini1(ClassifySemi):
+    # https://github.com/zshancock/SqueezeNet_vs_CIFAR10/blob/master/squeezenet_architecture.py
+    def fire_module(self, x, s1, e1, e3):
+        x = tf.layers.conv2d(x, s1, (1,1), activation='relu', padding = 'valid')
+        
+        # define the expand layer's (1,1) filters
+        expand_1x1 = tf.layers.conv2d(x, e1, (1,1), activation='relu', padding='valid')
+        
+        # define the expand layer's (3,3) filters
+        expand_3x3 = tf.layers.conv2d(x, e3, (3,3), activation='relu', padding='same')
+        
+        x = tf.concat([expand_1x1, expand_3x3], axis=-1)
+        return x
+
+    def classifier(self, x, scales, filters, repeat, training, getter=None, dropout=0, **kwargs):
+        del kwargs
+        # bn_args = dict(training=training, momentum=0.999)
+
+        with tf.variable_scope('classify', reuse=tf.AUTO_REUSE, custom_getter=getter):
+            x = (x - self.dataset.mean) / self.dataset.std
+            # x = tf.layers.conv2d(x, filters=96, kernel_size=7, strides=2, activation='relu')
+            x = tf.layers.conv2d(x, 64, (3, 3), strides=(1, 1), activation='relu', padding='valid')
+            x = tf.layers.max_pooling2d(x, pool_size=(3, 3), strides=(2, 2))
+
+            x = self.fire_module(x, s1=16, e1=64, e3=64)
+            x = self.fire_module(x, s1=16, e1=64, e3=64)
+
+            x = self.fire_module(x, s1=32, e1=128, e3=128)
+            x = self.fire_module(x, s1=32, e1=128, e3=128)
+            if training:
+                x = tf.layers.dropout(x, 0.5)
+
+            x = tf.layers.conv2d(x, self.nclass, (1, 1), activation='relu', padding='valid')
+            logits = tf.keras.layers.GlobalAveragePooling2D()(x)
+
+            return EasyDict(logits=logits, embeds=x)
+
+
+
+class MultiModel(CNN13, ResNet, ShakeNet, SqueezeNet, SqueezeNetCifar, SqueezeNetMini, SqueezeNetMini1):
+    MODELS = ('cnn13', 'resnet', 'shake', 'squeezenet' , 'squeezenetcifar', 'squeezenetmini', 'squeezenetmini1')
+    MODEL_CNN13, MODEL_RESNET, MODEL_SHAKE, MODEL_SQUEEZENET, MODEL_SQUEEZENETCIFAR, MODEL_SQUEEZENETMINI, MODEL_SQUEEZENETMINI1  = MODELS
 
     def augment(self, x, l, smoothing, **kwargs):
         del kwargs
@@ -296,6 +335,8 @@ class MultiModel(CNN13, ResNet, ShakeNet, SqueezeNet, SqueezeNetCifar, SqueezeNe
             return SqueezeNetCifar.classifier(self, x, **kwargs)
         elif arch == self.MODEL_SQUEEZENETMINI:
             return SqueezeNetMini.classifier(self, x, **kwargs)
+        elif arch == self.MODEL_SQUEEZENETMINI1:
+            return SqueezeNetMini1.classifier(self, x, **kwargs)
         raise ValueError('Model %s does not exists, available ones are %s' % (arch, self.MODELS))
 
 
